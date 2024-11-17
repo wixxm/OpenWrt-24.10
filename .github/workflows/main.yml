@@ -1,0 +1,82 @@
+name: Sync OpenWrt 24.10 to Main
+
+permissions:
+  contents: write  # 允许写入内容
+
+on:
+  push:
+    paths:
+      - '.github/workflows/main.yml'
+  schedule:
+    - cron: 0 */12 * * *  # 每12小时运行一次
+  workflow_dispatch:  # 支持手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 克隆 OpenWrt 官方仓库的 23.05.5 分支
+      - name: Clone OpenWrt Repository
+        run: |
+          git clone --branch openwrt-24.10 https://github.com/openwrt/openwrt.git openwrt
+          cd openwrt
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # 2. 克隆目标仓库（你的仓库）
+      - name: Clone Your Repository
+        env:
+          PAT: ${{ secrets.PAT_TOKEN }}
+        run: |
+          git clone https://x-access-token:${PAT}@github.com/wixxm/OpenWrt-24.10-1.git target_repo
+
+      # 3. 备份 .github 文件夹和需要保留的文件
+      - name: Backup Existing Files
+        run: |
+          mkdir -p backup
+          # 备份 .github 文件夹
+          if [ -d "target_repo/.github" ]; then
+            mv target_repo/.github backup/github_backup
+          fi
+          # 备份需要保留的文件
+          mkdir -p backup/files
+          cp -r target_repo/config/Config-images.in backup/files/
+          cp -r target_repo/package/base-files/files/etc/banner backup/files/
+          cp -r target_repo/package/base-files/files/bin/config_generate backup/files/
+          cp -r target_repo/include/version.mk backup/files/
+
+      # 4. 将 OpenWrt 仓库的内容同步到目标仓库
+      - name: Sync OpenWrt Changes
+        run: |
+          rsync -av --delete --exclude='.git' --exclude='.github' openwrt/ target_repo/
+
+      # 5. 恢复备份的文件和文件夹
+      - name: Restore Backup Files
+        run: |
+          # 恢复 .github 文件夹
+          if [ -d "backup/github_backup" ]; then
+            mv backup/github_backup target_repo/.github
+          fi
+          # 恢复其他文件
+          cp -r backup/files/Config-images.in target_repo/config/
+          cp -r backup/files/banner target_repo/package/base-files/files/etc/
+          cp -r backup/files/config_generate target_repo/package/base-files/files/bin/
+          cp -r backup/files/version.mk target_repo/include/
+
+      # 6. 显式配置 Git 用户信息并提交更改
+      - name: Commit and Push Changes
+        env:
+          PAT: ${{ secrets.PAT_TOKEN }}
+        run: |
+          cd target_repo
+          # 配置 Git 用户信息
+          git config user.name "wixxm"  # 修改为您的用户名
+          git config user.email "419691642@qq.com.com"  # 修改为您的邮箱
+
+          # 获取当前日期和时间
+          timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+
+          # 提交并强制推送更改
+          git add .
+          git commit -m "🏅 Sync OpneWrt-24.10 - $timestamp" || echo "没有新的更改可提交"
+          git push origin HEAD:main --force
