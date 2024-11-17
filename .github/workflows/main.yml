@@ -38,12 +38,7 @@ jobs:
           if [ -d "target_repo/.github" ]; then
             mv target_repo/.github backup/github_backup
           fi
-          # 备份需要保留的文件
-          mkdir -p backup/files
-          cp -r target_repo/config/Config-images.in backup/files/
-          cp -r target_repo/package/base-files/files/etc/banner backup/files/
-          cp -r target_repo/package/base-files/files/bin/config_generate backup/files/
-          cp -r target_repo/include/version.mk backup/files/
+         
 
       # 4. 将 OpenWrt 仓库的内容同步到目标仓库
       - name: Sync OpenWrt Changes
@@ -57,11 +52,7 @@ jobs:
           if [ -d "backup/github_backup" ]; then
             mv backup/github_backup target_repo/.github
           fi
-          # 恢复其他文件
-          cp -r backup/files/Config-images.in target_repo/config/
-          cp -r backup/files/banner target_repo/package/base-files/files/etc/
-          cp -r backup/files/config_generate target_repo/package/base-files/files/bin/
-          cp -r backup/files/version.mk target_repo/include/
+          
 
       # 6. 显式配置 Git 用户信息并提交更改
       - name: Commit and Push Changes
