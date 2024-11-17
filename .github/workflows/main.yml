@@ -73,6 +73,9 @@ jobs:
           git config user.name "wixxm"  # 修改为您的用户名
           git config user.email "girhub@github.com"  # 修改为您的邮箱
 
+          # 设置时区为上海
+          export TZ="Asia/Shanghai"
+
           # 获取当前日期和时间
           timestamp=$(date +"%Y-%m-%d %H:%M:%S")
 
