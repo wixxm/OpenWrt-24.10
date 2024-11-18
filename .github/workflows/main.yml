@@ -28,7 +28,7 @@ jobs:
         env:
           PAT: ${{ secrets.PAT_TOKEN }}
         run: |
-          git clone https://x-access-token:${PAT}@github.com/wixxm/OpenWrt-24.10-1.git target_repo
+          git clone https://x-access-token:${PAT}@github.com/wixxm/OpenWrt-24.10.git target_repo
 
       # 3. 备份 .github 文件夹和需要保留的文件
       - name: Backup Existing Files
