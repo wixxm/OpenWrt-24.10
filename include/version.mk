@@ -22,11 +22,14 @@ PKG_CONFIG_DEPENDS += \
 
 sanitize = $(call tolower,$(subst _,-,$(subst $(space),-,$(1))))
 
+# 获取当前日期，格式为 YYYYMMDD
+CURRENT_DATE := $(shell date +%Y%m%d)
+
 VERSION_NUMBER:=$(call qstrip,$(CONFIG_VERSION_NUMBER))
 VERSION_NUMBER:=$(if $(VERSION_NUMBER),$(VERSION_NUMBER),24.10-Wikjx)
 
-VERSION_CODE:=$(call qstrip,$(CONFIG_VERSION_CODE))
-VERSION_CODE:=$(if $(VERSION_CODE),$(VERSION_CODE),$(REVISION))
+# 版本代码，直接使用日期
+VERSION_CODE := $(CURRENT_DATE)
 
 VERSION_REPO:=$(call qstrip,$(CONFIG_VERSION_REPO))
 VERSION_REPO:=$(if $(VERSION_REPO),$(VERSION_REPO),https://downloads.openwrt.org/releases/24.10-SNAPSHOT)
